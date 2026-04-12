@@ -4,17 +4,31 @@ import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 import Link from 'next/link';
 import { generatePagination } from '@/app/lib/utils';
-
+import { use } from 'react';
+import { usePathname, useSearchParams } from 'next/navigation';
+ 
 export default function Pagination({ totalPages }: { totalPages: number }) {
   // NOTE: Uncomment this code in Chapter 10
+    const searchParams = useSearchParams();
+    const currentPage = Number(searchParams.get('page')) || 1;
+    const allPages = generatePagination(currentPage, totalPages);
+    const pathname = usePathname();
+    const createPageURL = (pageNumber: number | string) => {
+    const params = new URLSearchParams(searchParams);
+    
+    // 直接根据传入的 pageNumber 设置
+    params.set('page', pageNumber.toString());
+    
+    // 如果是第一页，通常可以为了 URL 美观删掉 page 参数（可选）
+    // if (Number(pageNumber) === 1) params.delete('page');
 
-  // const allPages = generatePagination(currentPage, totalPages);
-
+    return `${pathname}?${params.toString()}`;
+  };
   return (
     <>
       {/*  NOTE: Uncomment this code in Chapter 10 */}
 
-      {/* <div className="inline-flex">
+      <div className="inline-flex">
         <PaginationArrow
           direction="left"
           href={createPageURL(currentPage - 1)}
@@ -47,7 +61,7 @@ export default function Pagination({ totalPages }: { totalPages: number }) {
           href={createPageURL(currentPage + 1)}
           isDisabled={currentPage >= totalPages}
         />
-      </div> */}
+      </div>
     </>
   );
 }
