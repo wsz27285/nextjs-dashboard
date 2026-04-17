@@ -1,5 +1,7 @@
 'use server';
- 
+
+import { signIn } from '@/auth';
+import { AuthError } from 'next-auth';
 import { z } from 'zod';
 import postgres from 'postgres';
 import { revalidatePath } from 'next/cache';
@@ -18,7 +20,9 @@ const FormSchema = z.object({
   customerId: z.string({
     invalid_type_error: '请选择一个客户。',
   }).min(1), // 不允许空字符串,
-  amount: z.coerce.number(),
+  amount: z.coerce.number().gt(0, {
+    message: '金额必须大于0。',
+  }), // 将输入转换为数字，并且必须大于0
   status: z.enum(['pending', 'paid'], {
     invalid_type_error: '请选择账单状态。',
   }), // 允许 null 值（如果业务允许）
@@ -84,3 +88,22 @@ export async function deleteInvoice(id: string) {
   revalidatePath('/dashboard/invoices');
   redirect('/dashboard/invoices');
 } 
+
+export async function authenticate(
+  prevState: string | undefined,
+  formData: FormData,
+) {
+  try {
+    await signIn('credentials', formData);
+  } catch (error) {
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case 'CredentialsSignin':
+          return 'Invalid credentials.';
+        default:
+          return 'Something went wrong.';
+      }
+    }
+    throw error;
+  }
+}

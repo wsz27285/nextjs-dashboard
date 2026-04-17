@@ -6,6 +6,10 @@ import { lusitana } from '@/app/ui/font';
 import { InvoicesTableSkeleton } from '@/app/ui/skeletons';
 import { Suspense } from 'react';
 import { fetchInvoicesPages } from '@/app/lib/data';
+export const metadata = {
+  title: 'Invoices - Dashboard',
+  description: 'Manage your invoices efficiently with our dashboard.',  
+}
 type PageParamsType = {
     searchParams?: { query: string; page: string }
 }
